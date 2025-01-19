@@ -3,3 +3,5 @@ data/
 .ipynb_checkpoints/
 .venv/
 langgraph/llm_config.py
+langgraph/embeddings_config.py
+*/__pycache__/
