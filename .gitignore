@@ -6,3 +6,8 @@ langgraph/llm_config.py
 langgraph/embeddings_config.py
 */__pycache__/
 .amlignore*
+*.code-workspace
+.env*
+*.parquet
+*.pyc
+project/tac/*dataset*/
