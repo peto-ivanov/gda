@@ -62,6 +62,10 @@ if __name__ =="__main__":
     def preprocess_function(examples, tokenizer=tokenizer):
         return tokenizer(examples["text"], truncation=True)
     
+    # execute preprocessing
+    train_dataset = train_dataset.map(preprocess_function, batched=True)
+    test_dataset = test_dataset.map(preprocess_function, batched=True)
+    
     # download model from model hub
     model = RobertaForSequenceClassification.from_pretrained("roberta-base", num_labels=2)
 
@@ -77,7 +81,7 @@ if __name__ =="__main__":
         learning_rate=float(args.learning_rate),
     )
 
-# create Trainer instance
+    # create Trainer instance
     trainer = Trainer(
         model=model,
         args=training_args,
