@@ -12,7 +12,7 @@ class DatasetSettings(BaseSettings):
 
 class AWSSettings(BaseSettings):
     EXECUTION_ROLE: str
-    BUCKET_NAME: str
+    BUCKET: str
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -10,4 +10,5 @@ langgraph/embeddings_config.py
 .env*
 *.parquet
 *.pyc
-project/tac/*dataset*/
+project/tac/data/
+project/tac/models/

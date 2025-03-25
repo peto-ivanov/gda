@@ -7,8 +7,12 @@ from pathlib import Path
 from urllib.parse import urlparse
 from datasets import Dataset, Value, ClassLabel, Features, load_from_disk
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
-from transformers import Trainer, TrainingArguments, RobertaTokenizer, RobertaForSequenceClassification
+from transformers import Trainer, TrainingArguments
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import DataCollatorWithPadding
+from transformers import EarlyStoppingCallback
 
+model_name = "huawei-noah/TinyBERT_General_4L_312D"
 
 if __name__ =="__main__":
 
@@ -56,18 +60,22 @@ if __name__ =="__main__":
         return {"accuracy": acc, "f1": f1, "precision": precision, "recall": recall}
 
     # init tokenizer
-    tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     # dataset preprocessing
     def preprocess_function(examples, tokenizer=tokenizer):
-        return tokenizer(examples["text"], truncation=True)
+        return tokenizer(examples["text"], max_length=512 ,truncation=True)
     
     # execute preprocessing
     train_dataset = train_dataset.map(preprocess_function, batched=True)
     test_dataset = test_dataset.map(preprocess_function, batched=True)
     
     # download model from model hub
-    model = RobertaForSequenceClassification.from_pretrained("roberta-base", num_labels=2)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=2)
+
+    #TODO: freeze tinybert layers
+    # for param in model.???.parameters():
+    #     param.requires_grad = False
 
     # define training args
     training_args = TrainingArguments(
@@ -79,7 +87,17 @@ if __name__ =="__main__":
         evaluation_strategy="epoch",
         logging_dir=f"{args.output_data_dir}/logs",
         learning_rate=float(args.learning_rate),
+        disable_tqdm=True,
+        logging_strategy="steps",
+        logging_steps=30,
+        logging_first_step=True,
+        metric_for_best_model="accuracy",
+        greater_is_better=True,
+        load_best_model_at_end=True,
     )
+
+    # data collator
+    data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
     # create Trainer instance
     trainer = Trainer(
@@ -89,6 +107,8 @@ if __name__ =="__main__":
         train_dataset=train_dataset,
         eval_dataset=test_dataset,
         tokenizer=tokenizer,
+        data_collator=data_collator,
+        callbacks=[EarlyStoppingCallback(early_stopping_patience=3)],
     )
 
     # train model
