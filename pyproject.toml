@@ -27,6 +27,7 @@ torchvision = {version = "^0.21.0", source = "pytorch"}
 torchaudio = {version = "^2.6.0", source = "pytorch"}
 boto3 = "^1.37.16"
 pydantic-settings = "^2.8.1"
+streamlit = "^1.44.0"
 
 
 [tool.poetry.group.dev.dependencies]
